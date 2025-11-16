@@ -1,0 +1,42 @@
+adjust file paths, and optionally specific QC filter thresholds, depending on your dataset. Here, we’ll assume the dataset is in a common 10x Genomics format (filtered_feature_bc_matrix or .h5ad, etc.).
+Python
+import scanpy as sc
+
+# 1. Load Data
+adata = sc.read_10x_mtx("path/to/filtered_feature_bc_matrix/")  # or sc.read_h5ad("your_file.h5ad")
+
+# 2. QC - calculate QC metrics
+adata.var['mt'] = adata.var_names.str.startswith('MT-')  # annotate mitochondrial genes
+sc.pp.calculate_qc_metrics(adata, qc_vars=['mt'], percent_top=None, log1p=False, inplace=True)
+
+# 3. Filter cells and genes
+adata = adata[adata.obs.n_genes_by_counts > 200, :]
+adata = adata[adata.obs.pct_counts_mt < 5, :]
+adata = adata[:, adata.var.n_cells_by_counts > 3]
+
+# 4. Normalize and log-transform
+sc.pp.normalize_total(adata, target_sum=1e4)
+sc.pp.log1p(adata)
+
+# 5. Find highly variable genes
+sc.pp.highly_variable_genes(adata, min_mean=0.0125, max_mean=3, min_disp=0.5)
+adata = adata[:, adata.var.highly_variable]
+
+# 6. Scale and PCA
+sc.pp.scale(adata, max_value=10)
+sc.tl.pca(adata, svd_solver='arpack')
+
+# 7. Neighbors and UMAP
+sc.pp.neighbors(adata, n_neighbors=10, n_pcs=40)
+sc.tl.umap(adata)
+
+# 8. Clustering
+sc.tl.leiden(adata)
+
+# 9. Find marker genes
+sc.tl.rank_genes_groups(adata, 'leiden', method='t-test')
+
+# 10. Visualization
+sc.pl.umap(adata, color=['leiden'])
+sc.pl.rank_genes_groups(adata, n_genes=20, sharey=False)
+________________________________________
