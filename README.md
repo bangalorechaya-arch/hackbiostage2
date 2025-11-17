@@ -129,6 +129,10 @@ table(seu$sample, Idents(seu)) -> convert to proportions per sample.
 •	Very low megakaryocyte calls: expected—rare cells need larger input or targeted enrichment
 
 
+
+https://www.linkedin.com/feed/
+
+
 4. Based on the relative abundance of cell types, is the patient healthy or infected?
 Use the cluster proportions to make a call.
 Your job: defend your conclusion using deviations in:
